@@ -77,13 +77,21 @@ function saveAnswer(data) {
   var row = [new Date(data.timestamp || Date.now()), name, data.rsvpLabel || getLabel(code), Number(data.guests || 0), wish];
   var sheet = getOrCreateSheet();
   var at = data.changed ? findRowByName(sheet, String(data.prevName || name).trim()) : 0;  // гость изменил ответ — обновляем его строку
-  if (!at) { sheet.appendRow(row); at = sheet.getLastRow(); }
-  else sheet.getRange(at, 1, 1, row.length).setValues([row]);
+  if (!at) at = lastAnswerRow(sheet) + 1;               // жаңы жооп / новый ответ — сразу под последним ответом
+  sheet.getRange(at, 1, 1, row.length).setValues([row]);
   var show = sheet.getRange(at, COL.show);
   if (wish) { if (show.getValue() === "") show.insertCheckboxes().check(); }
   else show.clearDataValidations().clearContent();
   updateTotals(sheet);
   return true;
+}
+
+/** Акыркы жооптун сабы / Последняя строка с ответом (по колонке «Убакыт»): итоги справа (H–I) не считаются. */
+function lastAnswerRow(sheet) {
+  var last = sheet.getLastRow(); if (last < 2) return 1;
+  var col = sheet.getRange(2, COL.time, last - 1, 1).getValues();
+  for (var i = col.length - 1; i >= 0; i--) if (col[i][0] !== "") return i + 2;
+  return 1;
 }
 
 function findRowByName(sheet, name) {
