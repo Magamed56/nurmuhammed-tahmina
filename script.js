@@ -362,14 +362,31 @@
     }, ms / steps);
   }
   function setPlaying(on) { musicBtn.classList.toggle("is-playing", on); musicBtn.setAttribute("aria-pressed", on ? "true" : "false"); }
+  let userPaused = false;
+  // Браузер үндү бөгөттөсө (мисалы, мукаба сыдыруу менен ачылса) — кийинки басууда кайра коёбуз.
+  // Если браузер не дал включить звук (например, обложку открыли свайпом — это не «нажатие»),
+  // музыка стартует от следующего касания: отпускания пальца после свайпа, тапа или клавиши.
+  const GESTURES = ["touchend", "pointerup", "click", "keydown"];
+  let armed = false;
+  function playOnNextGesture() {
+    if (armed) return; armed = true;
+    const go = (e) => {
+      if (e && e.target && e.target.closest && e.target.closest("#music-btn")) return; // кнопку музыки обрабатывает её обработчик
+      armed = false; GESTURES.forEach((ev) => removeEventListener(ev, go, true));
+      if (!userPaused && audio.paused) play();
+    };
+    GESTURES.forEach((ev) => addEventListener(ev, go, { capture: true, passive: true }));
+  }
   function play() {
     if (!audio.src) return;
     const p = audio.play();
-    if (p && p.then) p.then(() => { fadeTo(0.7); setPlaying(true); }).catch(() => setPlaying(false));
+    if (p && p.then) p.then(() => { fadeTo(0.7); setPlaying(true); }).catch(() => { setPlaying(false); playOnNextGesture(); });
     else { fadeTo(0.7); setPlaying(true); }
   }
   function pause() { fadeTo(0, 700); setPlaying(false); }
-  musicBtn.addEventListener("click", () => (audio.paused || audio.volume === 0 ? play() : pause()));
+  musicBtn.addEventListener("click", () => {
+    if (audio.paused || !musicBtn.classList.contains("is-playing")) { userPaused = false; play(); } else { userPaused = true; pause(); }
+  });
   document.addEventListener("visibilitychange", () => {
     if (document.hidden && !audio.paused) audio.pause();
     else if (!document.hidden && musicBtn.classList.contains("is-playing")) audio.play().catch(() => {});
@@ -383,6 +400,7 @@
     if (intro.classList.contains("is-open")) return;
     intro.classList.add("is-open");
     play();
+    playOnNextGesture(); // свайп/колесо не считаются нажатием — страхуемся следующим касанием
     const r = ($(".seal__disc") || $("#open-btn")).getBoundingClientRect();
     burst(r.left + r.width / 2, r.top + r.height / 2, 70);
     setTimeout(() => { body.classList.remove("locked"); body.classList.add("opened"); heroDust.start(); }, UNLOCK);

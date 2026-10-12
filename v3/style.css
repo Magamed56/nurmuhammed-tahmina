@@ -76,7 +76,7 @@ svg use { pointer-events: none; }
 @keyframes ripple { to { transform: scale(2.4); opacity: 0; } }
 
 /* ---------- Мукаба: түндүк-терезе / Обложка: тюндюк-окно ---------- */
-.intro {
+.intro { touch-action: none;
   position: fixed; inset: 0; z-index: 100; overflow: hidden; text-align: center;
   background: radial-gradient(70% 45% at 50% 42%, #1d2a66 0%, var(--night-900) 60%, var(--night-950) 100%);
   transition: opacity .9s ease .55s, visibility .9s .55s;

@@ -63,7 +63,7 @@ svg use { pointer-events: none; }
 @keyframes ripple { to { transform: scale(2.4); opacity: 0; } }
 
 /* ---------- Мукаба: лента / Обложка: лента и бант ---------- */
-.intro {
+.intro { touch-action: none;
   --ry: 57%;
   position: fixed; inset: 0; z-index: 100; overflow: hidden; text-align: center;
   background: radial-gradient(90% 60% at 50% 40%, #fffdf9 0%, var(--bg) 60%, var(--bg-2) 100%), var(--paper-tex);

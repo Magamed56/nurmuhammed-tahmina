@@ -83,7 +83,7 @@ svg use { pointer-events: none; }
 @keyframes ripple { to { transform: scale(2.4); opacity: 0; } }
 
 /* ---------- Мукаба: эшиктер / Обложка: двери ---------- */
-.intro { position: fixed; inset: 0; z-index: 100; perspective: 1800px; overflow: hidden; transition: opacity .8s ease, visibility .8s; }
+.intro { touch-action: none; position: fixed; inset: 0; z-index: 100; perspective: 1800px; overflow: hidden; transition: opacity .8s ease, visibility .8s; }
 .intro.is-hidden { opacity: 0; visibility: hidden; pointer-events: none; }
 .door {
   position: absolute; top: 0; bottom: 0; width: 50.2%;
