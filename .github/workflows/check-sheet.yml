@@ -1,5 +1,5 @@
-name: Check Google Sheet backend
-# Временная проверка: доступна ли таблица (Apps Script) из интернета. Ветку удалим после проверки.
+name: Check link preview
+# Временная проверка: что видит робот WhatsApp по ссылке приглашения. Ветку удалим после проверки.
 on:
   push:
     branches: [check-sheet]
@@ -7,13 +7,15 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - name: Call Apps Script
+      - name: Fetch like WhatsApp
         run: |
-          U="https://script.google.com/macros/s/AKfycbzonQeT7c2nT6MeE5C6npjcG00ptbM0sU_Qfn8GAx4t-PNP0t2bcFHr9H2FgHzkeyrY/exec"
-          V=$(curl -sSL -m 60 "$U?action=version" | head -c 200); echo "== 1. GET version: $V"
-          if [ "$V" != "version 3" ]; then echo "OLD CODE STILL DEPLOYED — no test write"; exit 0; fi
-          echo "== 2. POST change of the test answer (same row → totals)"
-          curl -sSL -m 60 -H "Content-Type: text/plain;charset=utf-8" \
-            --data '{"name":"ТЕСТ Claude — өчүрүп салыңыз","prevName":"ТЕСТ Claude — өчүрүп салыңыз","changed":true,"rsvp":"both","rsvpLabel":"Жубайым менен келемин","guests":2,"wish":"Текшерүү 5: бул сапты өчүрүп салыңыз","timestamp":"2026-10-12T10:00:00Z"}' \
-            "$U" | head -c 600; echo
-          echo "== 3. GET wishes after"; curl -sSL -m 60 "$U?action=wishes&callback=cb" | head -c 600; echo
+          UA="WhatsApp/2.24.20.80 A"
+          for P in "" "?g=Test"; do
+            S="https://magamed56.github.io/nurmuhammed-tahmina/$P"
+            echo "== PAGE $S"; curl -sS -A "$UA" -o page.html -w "http %{http_code} type %{content_type} size %{size_download} redirect %{redirect_url}\n" "$S"
+            grep -o '<meta property="og:[^>]*>' page.html | head -8
+          done
+          IMG="https://magamed56.github.io/nurmuhammed-tahmina/assets/og.jpg"
+          echo "== IMAGE"; curl -sS -A "$UA" -o og.jpg -w "http %{http_code} type %{content_type} size %{size_download}\n" "$IMG"; file og.jpg
+          echo "== HEADERS"; curl -sSI -A "$UA" "$IMG" | head -20
+          echo "== PAGES ROOT"; curl -sS -o /dev/null -w "http %{http_code}\n" "https://magamed56.github.io/nurmuhammed-tahmina/v1/"
