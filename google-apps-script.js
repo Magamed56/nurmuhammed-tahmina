@@ -15,6 +15,7 @@
  *
  * Код өзгөртүлсө / После изменения кода: Развернуть → Управление развёртываниями → ✏️ → Версия: Новая версия → Развернуть.
  */
+var VERSION = "3";            // ?action=version — проверка, что развёрнута новая версия
 var SHEET_NAME = "Жооптор";
 // ID таблицы из её ссылки docs.google.com/spreadsheets/d/<ID>/edit — нужен, только если скрипт создан не из таблицы
 var SPREADSHEET_ID = "";
@@ -41,6 +42,7 @@ function doPost(e) {
 /** ?action=wishes&callback=fn — пожелания для сайта (JSONP); без параметров — проверка, что скрипт работает. */
 function doGet(e) {
   var p = (e && e.parameter) || {};
+  if (p.action === "version") return ContentService.createTextOutput("version " + VERSION).setMimeType(ContentService.MimeType.TEXT);
   if (p.action !== "wishes") return ContentService.createTextOutput("RSVP backend иштеп жатат ✔").setMimeType(ContentService.MimeType.TEXT);
   var out = { wishes: getWishes(60) };
   var cb = String(p.callback || "").replace(/[^\w$.]/g, "");
@@ -67,6 +69,15 @@ function setupSheet() {
   sheet.getRange(1, TOTALS_COL, 3, 1).setValues([["Келет (жооп)"], ["Келбейт"], ["Адам саны"]]).setFontWeight("bold");
   sheet.setColumnWidth(TOTALS_COL, 120);
   updateTotals(sheet);
+  // Итоги пересчитываются и при ручных правках/удалении строк (триггер «При изменении»), ставится один раз
+  var ss = sheet.getParent();
+  var has = ScriptApp.getProjectTriggers().some(function (t) { return t.getHandlerFunction() === "onSheetChange"; });
+  if (!has) ScriptApp.newTrigger("onSheetChange").forSpreadsheet(ss).onChange().create();
+}
+
+/** Таблицада кол менен өзгөртүү / Ручная правка или удаление строки — пересчитать итоги. */
+function onSheetChange() {
+  updateTotals(getOrCreateSheet());
 }
 
 function saveAnswer(data) {
