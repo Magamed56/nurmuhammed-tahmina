@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<!-- Шилтеме сүрөтү / Картинка для превью ссылки (assets/og.jpg, 1080×1080).
+     Пересоздать: открыть этот файл через локальный сервер и сделать скриншот 1080×1080 (README). -->
+<html lang="ky">
+<head>
+  <meta charset="UTF-8">
+  <title>OG</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,400&family=Great+Vibes&family=Manrope:wght@600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    html, body { width: 1080px; height: 1080px; margin: 0; overflow: hidden; }
+    body { display: grid; place-items: center; background: var(--velvet); background-size: 320px 320px, 240px 192px, 100% 100%; }
+    .arch { --aw: 640px; opacity: 1; transform: none; }
+    .arch__inner { padding: 50px 40px 70px; }
+    .arch__inner > * { opacity: 1; transform: none; }
+    .tunduk { width: 190px; height: 190px; }
+    .tunduk__rays { animation: none; }
+    .hero__kicker { font-size: 17px; }
+    .hero__name { font-size: 96px; }
+    .hero__amp { font-size: 58px; animation: none; }
+    .hero__month, .hero__year { font-size: 17px; }
+    .hero__side { min-width: 130px; font-size: 16px; padding: 10px 0; }
+    .hero__day { font-size: 90px; }
+    .hero__row { gap: 22px; }
+    .hero__date { gap: 10px; }
+    .hero__venue { font-size: 30px; margin-top: 18px; }
+    .arch__corner { width: 70px; height: 70px; bottom: 26px; }
+    .arch__corner--bl { left: 26px; } .arch__corner--br { right: 26px; }
+  </style>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+    <symbol id="corner" viewBox="0 0 80 80"><g fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M4 76 L4 20 C4 10 10 4 20 4 L76 4"/><path d="M12 76 L12 26 C12 18 18 12 26 12 L76 12"/><path d="M12 26 C24 26 30 34 28 42 C26 50 16 48 17 41 C18 36 24 36 24 40"/><path d="M26 12 C26 24 34 30 42 28 C50 26 48 16 41 17 C36 18 36 24 40 24"/><circle cx="4" cy="4" r="2"/></g></symbol>
+    <symbol id="rays" viewBox="0 0 200 200"><g id="rays-g" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.2"></g></symbol>
+    <symbol id="tunduk" viewBox="0 0 200 200"><g fill="none" stroke="currentColor" stroke-linecap="round"><circle cx="100" cy="100" r="44" stroke-width="2.2"/><circle cx="100" cy="100" r="37" stroke-width="1.2"/><g stroke-width="2"><path d="M66 88 Q100 78 134 88"/><path d="M63 100 Q100 90 137 100"/><path d="M66 112 Q100 102 134 112"/><path d="M88 66 Q78 100 88 134"/><path d="M100 63 Q90 100 100 137"/><path d="M112 66 Q102 100 112 134"/></g></g></symbol>
+  </defs></svg>
+  <div class="arch">
+    <svg class="arch__corner arch__corner--bl"><use href="#corner"/></svg>
+    <svg class="arch__corner arch__corner--br"><use href="#corner"/></svg>
+    <div class="arch__inner">
+      <svg class="tunduk" viewBox="0 0 200 200"><g class="tunduk__rays"><use href="#rays"/></g><use href="#tunduk"/></svg>
+      <p class="hero__kicker">Үйлөнүү тойго чакыруу</p>
+      <h1 class="hero__names"><span class="hero__name" id="g"></span><span class="hero__amp">&amp;</span><span class="hero__name" id="b"></span></h1>
+      <div class="hero__date">
+        <span class="hero__month" id="mon"></span>
+        <div class="hero__row"><span class="hero__side" id="wd"></span><span class="hero__day" id="day"></span><span class="hero__side" id="tm"></span></div>
+        <span class="hero__year" id="yr"></span>
+      </div>
+      <p class="hero__venue" id="venue"></p>
+    </div>
+  </div>
+  <script src="config.js"></script>
+  <script>
+    const C = window.WEDDING, [Y, M, D] = C.date.split("-").map(Number);
+    const set = (id, v) => (document.getElementById(id).textContent = v);
+    set("g", C.groom); set("b", C.bride); set("day", String(D).padStart(2, "0")); set("yr", Y); set("tm", C.timeStart); set("venue", C.venueName);
+    set("mon", ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"][M - 1]);
+    set("wd", ["Жекшемби", "Дүйшөмбү", "Шейшемби", "Шаршемби", "Бейшемби", "Жума", "Ишемби"][new Date(Y, M - 1, D).getDay()]);
+    let h = ""; for (let i = 0; i < 40; i++) { const a = i * 9 * Math.PI / 180, r1 = 52, r2 = i % 2 ? 66 : 80; h += `<line x1="${100 + r1 * Math.sin(a)}" y1="${100 - r1 * Math.cos(a)}" x2="${100 + r2 * Math.sin(a)}" y2="${100 - r2 * Math.cos(a)}"/>`; }
+    document.getElementById("rays-g").innerHTML = h;
+  </script>
+</body>
+</html>
