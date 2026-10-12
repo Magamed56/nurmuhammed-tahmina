@@ -1,0 +1,19 @@
+name: Check Google Sheet backend
+# Временная проверка: доступна ли таблица (Apps Script) из интернета. Ветку удалим после проверки.
+on:
+  push:
+    branches: [check-sheet]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call Apps Script
+        run: |
+          U="https://script.google.com/macros/s/AKfycbys5J2_YqJvyDPTVy5fhJJmbI4ANQzaqtVafdcUeeJ4nZIXkQqzcfah-zQGukzaw_zk/exec"
+          echo "== 1. GET status"; curl -sSL -m 60 -w "\n[http %{http_code}, final %{url_effective}]\n" "$U" | head -c 600; echo
+          echo "== 2. GET wishes (JSONP)"; curl -sSL -m 60 "$U?action=wishes&callback=cb" | head -c 600; echo
+          echo "== 3. POST test answer"
+          curl -sSL -m 60 -H "Content-Type: text/plain;charset=utf-8" \
+            --data '{"name":"ТЕСТ Claude — өчүрүп салыңыз","rsvp":"yes","rsvpLabel":"Келемин","guests":2,"wish":"Текшерүү: бул сапты өчүрүп салыңыз","timestamp":"2026-10-12T08:00:00Z"}' \
+            "$U" | head -c 600; echo
+          echo "== 4. GET wishes after"; curl -sSL -m 60 "$U?action=wishes&callback=cb" | head -c 600; echo
