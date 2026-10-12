@@ -42,6 +42,7 @@
       received: "Жообуңуз кабыл алынды.<br>Сизди тойдо күтөбүз.", receivedNo: "Жообуңуз кабыл алынды.<br>Кийинки жолу сөзсүз көрүшөбүз!",
       guestsLabel: "Канча адам келесиз?", wishLabel: "Каалоо (милдеттүү эмес)", wishPh: "Жаш үй-бүлөгө бир-эки жылуу сөз…", change: "Жоопту өзгөртүү",
       yourAnswer: "Сиздин жооп", people: "адам", cta: "Жооп берүү",
+      kWishes: "Каалоолор", wishesTitle: "Конокторубуздун жылуу сөздөрү", wishHint: "Каалооңуз ушул сайттагы «Каалоолор» бөлүмүндө көрүнөт",
       labels: { yes: "Келемин", both: "Жубайым менен келемин", no: "Келе албаймын" },
       wa: (g, b) => `Саламатсызбы! ${g} менен ${b} үйлөнүү тоюна жооп 💍`, waName: "Аты-жөнү", waAnswer: "Жооп", calTitle: (g, b) => `${g} & ${b} — үйлөнүү той`,
       months: ["январь", "февраль", "март", "апрель", "май", "июнь", "июль", "август", "сентябрь", "октябрь", "ноябрь", "декабрь"],
@@ -61,6 +62,7 @@
       received: "Ваш ответ принят.<br>Ждём вас на торжестве.", receivedNo: "Ваш ответ принят.<br>Обязательно увидимся в другой раз!",
       guestsLabel: "Сколько человек придёт?", wishLabel: "Пожелание (необязательно)", wishPh: "Пара тёплых слов молодой семье…", change: "Изменить ответ",
       yourAnswer: "Ваш ответ", people: "чел.", cta: "Ответить",
+      kWishes: "Пожелания", wishesTitle: "Тёплые слова гостей", wishHint: "Ваше пожелание появится на сайте в разделе «Пожелания»",
       labels: { yes: "Приду", both: "Приду с супругом(ой)", no: "Не смогу" },
       wa: (g, b) => `Здравствуйте! Ответ на приглашение на свадьбу ${g} и ${b} 💍`, waName: "Имя", waAnswer: "Ответ", calTitle: (g, b) => `${g} & ${b} — свадьба`,
       months: ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"],
@@ -348,6 +350,42 @@
     };
   })();
 
+  /* ---------- Гүл желекчелери / Лепестки (если в оформлении есть <canvas id="petals">) ---------- */
+  function startPetals() {
+    const canvas = $("#petals"); if (!canvas || REDUCED || canvas.dataset.on) return;
+    canvas.dataset.on = "1";
+    const ctx = canvas.getContext("2d"), dpr = Math.min(devicePixelRatio || 1, 2);
+    const COLORS = (rootCss.getPropertyValue("--petal-colors").trim() || "#f3c9c4,#eab3b0,#f7dcd6,#e9c4bd").split(",").map((c) => c.trim());
+    let W = 0, H = 0;
+    const resize = () => { W = canvas.width = innerWidth * dpr; H = canvas.height = innerHeight * dpr; };
+    addEventListener("resize", resize); resize();
+    const N = Math.min(20, Math.max(10, Math.floor(innerWidth / 32)));
+    const make = (init) => ({
+      x: Math.random() * W, y: init ? Math.random() * H : -20 * dpr, r: (5 + Math.random() * 7) * dpr,
+      vy: (0.3 + Math.random() * 0.55) * dpr, vx: (Math.random() - 0.5) * 0.4 * dpr, a: Math.random() * 6.28, va: (Math.random() - 0.5) * 0.03,
+      sw: Math.random() * 6.28, flip: Math.random() * 6.28, c: COLORS[(Math.random() * COLORS.length) | 0], o: 0.45 + Math.random() * 0.4,
+    });
+    const ps = Array.from({ length: N }, () => make(true));
+    let wind = 0;
+    addEventListener("scroll", () => { wind = Math.min(2.5, wind + 0.25); }, { passive: true });
+    (function draw() {
+      ctx.clearRect(0, 0, W, H); wind *= 0.95;
+      for (const p of ps) {
+        p.sw += 0.02 + wind * 0.01; p.flip += 0.03; p.y += p.vy * (1 + wind); p.a += p.va * (1 + wind);
+        p.x += p.vx + Math.sin(p.sw) * (0.4 + wind * 0.3) * dpr;
+        if (p.y > H + 30 || p.x < -40 || p.x > W + 40) Object.assign(p, make(false));
+        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.a); ctx.scale(1, 0.55 + 0.45 * Math.abs(Math.sin(p.flip))); ctx.globalAlpha = p.o;
+        const g = ctx.createRadialGradient(-p.r * 0.3, -p.r * 0.4, 0, 0, 0, p.r * 1.1);
+        g.addColorStop(0, "#fff7f4"); g.addColorStop(1, p.c); ctx.fillStyle = g;
+        ctx.beginPath(); ctx.moveTo(0, -p.r);
+        ctx.bezierCurveTo(p.r, -p.r, p.r, p.r * 0.6, 0, p.r);
+        ctx.bezierCurveTo(-p.r, p.r * 0.6, -p.r, -p.r, 0, -p.r);
+        ctx.fill(); ctx.restore();
+      }
+      requestAnimationFrame(draw);
+    })();
+  }
+
   /* ---------- Музыка ---------- */
   const audio = $("#bg-music"), musicBtn = $("#music-btn");
   if (CFG.music) audio.src = asset(CFG.music);
@@ -403,7 +441,7 @@
     playOnNextGesture(); // свайп/колесо не считаются нажатием — страхуемся следующим касанием
     const r = ($(".seal__disc") || $("#open-btn")).getBoundingClientRect();
     burst(r.left + r.width / 2, r.top + r.height / 2, 70);
-    setTimeout(() => { body.classList.remove("locked"); body.classList.add("opened"); heroDust.start(); }, UNLOCK);
+    setTimeout(() => { body.classList.remove("locked"); body.classList.add("opened"); heroDust.start(); startPetals(); }, UNLOCK);
     setTimeout(() => musicBtn.classList.add("is-visible"), HIDE - 200);
     setTimeout(() => { intro.classList.add("is-hidden"); introDust.stop(); }, HIDE);
     removeEventListener("wheel", onWheel); removeEventListener("keydown", onKey);
@@ -418,6 +456,51 @@
   addEventListener("keydown", onKey);
   // Башкы экран көрүнбөсө чаң токтойт / Пыль на главном экране только когда он виден
   new IntersectionObserver((en) => en.forEach((e) => (e.isIntersecting && body.classList.contains("opened") ? heroDust.start() : heroDust.stop()))).observe($("#hero"));
+
+  /* ---------- Каалоолор / Пожелания гостей на сайте (из Google Таблицы, колонка «Сайтта») ---------- */
+  const wishesSec = $("#wishes-sec"), wishesBox = $("#wishes");
+  let wishes = [];
+  function renderWishes() {
+    if (!wishesSec) return;
+    wishesSec.hidden = !wishes.length;
+    wishesBox.innerHTML = wishes.map((w) => `<figure class="wish"><svg class="wish__q" aria-hidden="true"><use href="#i-quote"/></svg><blockquote>${esc(w.wish)}</blockquote><figcaption>${esc(w.name)}</figcaption></figure>`).join("");
+    wishesBox.scrollLeft = 0;
+  }
+  // JSONP: Apps Script отдаёт пожелания как вызов функции — работает в любом браузере, без CORS
+  function loadWishes() {
+    if (!wishesSec || !CFG.googleScriptUrl) return;
+    const cb = `__wishes${Date.now()}`, s = document.createElement("script");
+    const done = () => { delete window[cb]; s.remove(); };
+    window[cb] = (data) => {
+      done();
+      const mine = wishes.filter((w) => w.mine);
+      wishes = mine.concat(((data && data.wishes) || []).filter((w) => w && w.wish && !mine.some((m) => m.name === w.name)));
+      renderWishes();
+    };
+    s.onerror = done;
+    s.src = `${CFG.googleScriptUrl}${CFG.googleScriptUrl.includes("?") ? "&" : "?"}action=wishes&callback=${cb}`;
+    document.head.appendChild(s);
+  }
+  // Гостьтун өз каалоосу дароо көрүнөт / Своё пожелание гость видит сразу после отправки
+  function addOwnWish(prevName, name, wish) {
+    if (!wishesSec || !CFG.googleScriptUrl) return;
+    wishes = wishes.filter((w) => w.name !== name && w.name !== prevName);
+    if (wish) wishes.unshift({ name, wish, mine: true });
+    renderWishes();
+  }
+  // Лента сама листается, пока её не трогают / Auto-advance while visible and untouched
+  if (wishesBox) {
+    let hold = 0, visible = false;
+    ["pointerdown", "touchstart", "wheel"].forEach((ev) => wishesBox.addEventListener(ev, () => (hold = Date.now() + 9000), { passive: true }));
+    new IntersectionObserver((en) => (visible = en[0].isIntersecting)).observe(wishesBox);
+    setInterval(() => {
+      if (!visible || REDUCED || Date.now() < hold || wishesBox.children.length < 2) return;
+      const step = wishesBox.children[0].getBoundingClientRect().width + 14;
+      const atEnd = wishesBox.scrollLeft + wishesBox.clientWidth >= wishesBox.scrollWidth - 6;
+      wishesBox.scrollTo({ left: atEnd ? 0 : wishesBox.scrollLeft + step, behavior: "smooth" });
+    }, 4800);
+  }
+  loadWishes();
 
   /* ---------- Суроо (RSVP) ---------- */
   function recordSheet(payload) {
@@ -472,7 +555,8 @@
     const prev = lastAnswer;
     lastAnswer = { name, attend, guests, wish, sent: true };
     // Таблицага жазуу фондо / запись в таблицу идёт параллельно уведомлению
-    const sheet = recordSheet({ name, rsvp: attend, rsvpLabel: (changed ? "(өзгөртүлдү) " : "") + T.ky.labels[attend], guests, wish, timestamp: d.toISOString() });
+    const sheet = recordSheet({ name, rsvp: attend, rsvpLabel: T.ky.labels[attend], guests, wish, changed, prevName: changed && prev ? prev.name : "", timestamp: d.toISOString() });
+    addOwnWish(prev && prev.name, name, wish);
 
     submitBtn.disabled = true; note.textContent = t("sending");
     if (tgReady()) {

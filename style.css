@@ -21,6 +21,7 @@
   --ease: cubic-bezier(.2, .7, .2, 1);
   --dust-rgb: 214, 150, 150;
   --confetti: #e8b4b0, #f3d2cc, #c7868a, #a9c0b8, #8fa38a, #e7cd92;
+  --petal-colors: #f3c9c4, #eab3b0, #f7dcd6, #e9c4bd, #f0d0c8;
   --paper-tex: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.7' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .55 0 0 0 0 .4 0 0 0 0 .38 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
@@ -77,7 +78,7 @@ svg use { pointer-events: none; }
 .flora--br { bottom: -7%; right: -20%; transform: rotate(-20deg); animation: sway 10s ease-in-out infinite alternate-reverse; }
 @keyframes sway { to { rotate: 3deg; } }
 .intro__top { position: absolute; left: 16px; right: 16px; bottom: calc(100% - var(--ry) + 74px); display: flex; flex-direction: column; align-items: center; transition: opacity .6s, transform .8s var(--ease); }
-.intro__bottom { position: absolute; left: 16px; right: 16px; top: calc(var(--ry) + 96px); transition: opacity .6s, transform .8s var(--ease); }
+.intro__bottom { position: absolute; left: 16px; right: 16px; top: calc(var(--ry) + 136px); transition: opacity .6s, transform .8s var(--ease); }
 .intro__guest { font-family: var(--serif); font-style: italic; font-weight: 500; font-size: clamp(24px, 6.6vw, 30px); color: var(--rose); margin-bottom: 4px; animation: rise 1.2s var(--ease) .2s both; }
 .intro__kicker { font-family: var(--sans); font-size: 11px; font-weight: 600; letter-spacing: .34em; text-transform: uppercase; color: var(--sage-deep); animation: rise 1.2s var(--ease) .35s both; }
 .intro__names { display: flex; flex-direction: column; align-items: center; margin-top: 12px; font-family: var(--script); font-size: clamp(44px, 13vw, 66px); line-height: 1.02; color: var(--rose-ink); animation: rise 1.2s var(--ease) .55s both; }
@@ -125,6 +126,7 @@ svg use { pointer-events: none; }
 @keyframes bar { 50% { height: 16px; } }
 .progress { position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 110; background: linear-gradient(90deg, var(--sage), var(--rose)); transform-origin: 0 50%; transform: scaleX(var(--sp, 0)); }
 .fx { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 90; pointer-events: none; }
+.petals { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 60; pointer-events: none; }
 
 /* ---------- Башкы экран / Главный экран ---------- */
 .hero {
@@ -282,6 +284,56 @@ body.opened .scroll-hint { opacity: 1; }
 /* ---------- Жооп берүү баскычы / Плавающая кнопка ---------- */
 .cta { position: fixed; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom)); z-index: 80; display: inline-flex; align-items: center; gap: 10px; padding: 14px 26px; border-radius: 999px; text-decoration: none; font-family: var(--sans); font-size: 12px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: #fff; background: linear-gradient(120deg, #b97077, var(--rose) 50%, #d79d9f); box-shadow: 0 14px 30px -10px rgba(125, 66, 73, .55); transform: translate(-50%, 160%); transition: transform .6s var(--ease); }
 .cta.is-on { transform: translate(-50%, 0); }
+
+
+/* ---------- Аттар колго жазылат / Имена «пишутся» от руки ---------- */
+.write {
+  -webkit-mask-image: linear-gradient(90deg, #000 44%, transparent 56%); mask-image: linear-gradient(90deg, #000 44%, transparent 56%);
+  -webkit-mask-size: 260% 100%; mask-size: 260% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-position: 100% 0; mask-position: 100% 0;
+  padding: .2em .3em; margin: -.2em -.3em;   /* место для росчерков шрифта, иначе маска их обрежет */
+}
+@keyframes write { to { -webkit-mask-position: 0 0; mask-position: 0 0; } }
+.intro__names .write { animation: write 1.9s cubic-bezier(.5, .1, .35, 1) .75s forwards; }
+.intro__names .write--2 { animation-delay: 2.2s; }
+.intro__names i { animation: fadeIn .8s ease 1.9s both; }
+body.opened .hero__name.write { animation: write 1.9s cubic-bezier(.5, .1, .35, 1) .7s forwards; }
+body.opened .hero__name.write--2 { animation-delay: 2.1s; }
+.hero__amp { opacity: 0; }
+body.opened .hero__amp { animation: fadeIn .9s ease 1.9s forwards; }
+@keyframes fadeIn { from { opacity: 0; transform: scale(.7); } to { opacity: 1; transform: none; } }
+
+/* ---------- Бантыгы бирка / Бирка «Н&Т» на банте ---------- */
+.tag { position: absolute; left: 50%; top: 60px; width: 0; height: 0; transform-origin: 0 0; animation: swing 3.4s ease-in-out 2s infinite alternate; }
+.tag__string { position: absolute; left: -.5px; top: 0; width: 1px; height: 30px; background: linear-gradient(#a8676c, #c99a9b); }
+.tag__card {
+  position: absolute; left: -37px; top: 27px; width: 74px; height: 74px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; gap: 1px;
+  font-family: var(--script); font-size: 30px; line-height: 1; color: var(--rose-ink);
+  background: radial-gradient(circle at 35% 30%, #fff 0%, var(--paper) 55%, #f6e9e4 100%);
+  box-shadow: 0 0 0 1px var(--rose), 0 0 0 4px #fffdfa, 0 0 0 5px rgba(199, 134, 138, .45), 0 10px 18px rgba(125, 66, 73, .28);
+}
+.tag__card::before { content: ""; position: absolute; top: 6px; left: 50%; width: 6px; height: 6px; margin-left: -3px; border-radius: 50%; background: var(--bg-2); box-shadow: inset 0 0 0 1px rgba(158, 90, 97, .45); }
+.tag__card b { font-weight: 400; font-size: .62em; color: var(--rose); margin: 0 1px; }
+@keyframes swing { from { transform: rotate(-6deg); } to { transform: rotate(6deg); } }
+
+/* ---------- Каалоолор / Пожелания гостей ---------- */
+.sec--wishes { padding-bottom: 96px; }
+.sec--wishes[hidden] { display: none; }
+.wishes {
+  display: flex; gap: 14px; margin: 24px -18px 0; padding: 6px 18px 26px; overflow-x: auto; scroll-snap-type: x mandatory;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch; text-align: left;
+}
+.wishes::-webkit-scrollbar { display: none; }
+.wish {
+  position: relative; flex: 0 0 min(80%, 340px); margin: 0; padding: 30px 24px 22px; scroll-snap-align: center;
+  border-radius: 22px; background: var(--paper); border: 1px solid var(--line); box-shadow: 0 22px 44px -26px rgba(158, 90, 97, .45);
+}
+.wish__q { position: absolute; top: -12px; left: 22px; width: 38px; height: 28px; color: var(--rose); filter: drop-shadow(0 4px 6px rgba(158, 90, 97, .25)); }
+.wish blockquote { margin: 0; font-style: italic; font-size: 20px; line-height: 1.55; color: var(--ink); overflow-wrap: anywhere; }
+.wish figcaption { margin-top: 14px; font-family: var(--sans); font-size: 11px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--sage-deep); }
+.wish figcaption::before { content: "— "; color: var(--rose); }
+@media (min-width: 720px) { .wishes { margin: 24px 0 0; padding: 6px 0 26px; } .wish { flex-basis: 300px; } }
 
 @media (min-width: 720px) {
   body { font-size: 21px; }
