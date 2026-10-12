@@ -10,10 +10,10 @@ jobs:
       - name: Call Apps Script
         run: |
           U="https://script.google.com/macros/s/AKfycbys5J2_YqJvyDPTVy5fhJJmbI4ANQzaqtVafdcUeeJ4nZIXkQqzcfah-zQGukzaw_zk/exec"
-          echo "== 1. GET version"; curl -sSL -m 60 "$U?action=version" | head -c 300; echo
-          echo "== 2. GET wishes (JSONP)"; curl -sSL -m 60 "$U?action=wishes&callback=cb" | head -c 600; echo
-          echo "== 3. POST change of the test answer (same row → totals)"
+          V=$(curl -sSL -m 60 "$U?action=version" | head -c 200); echo "== 1. GET version: $V"
+          if [ "$V" != "version 3" ]; then echo "OLD CODE STILL DEPLOYED — no test write"; exit 0; fi
+          echo "== 2. POST change of the test answer (same row → totals)"
           curl -sSL -m 60 -H "Content-Type: text/plain;charset=utf-8" \
-            --data '{"name":"ТЕСТ Claude — өчүрүп салыңыз","prevName":"ТЕСТ Claude — өчүрүп салыңыз","changed":true,"rsvp":"both","rsvpLabel":"Жубайым менен келемин","guests":2,"wish":"Текшерүү 4: бул сапты өчүрүп салыңыз","timestamp":"2026-10-12T09:30:00Z"}' \
+            --data '{"name":"ТЕСТ Claude — өчүрүп салыңыз","prevName":"ТЕСТ Claude — өчүрүп салыңыз","changed":true,"rsvp":"both","rsvpLabel":"Жубайым менен келемин","guests":2,"wish":"Текшерүү 5: бул сапты өчүрүп салыңыз","timestamp":"2026-10-12T10:00:00Z"}' \
             "$U" | head -c 600; echo
-          echo "== 4. GET wishes after"; curl -sSL -m 60 "$U?action=wishes&callback=cb" | head -c 600; echo
+          echo "== 3. GET wishes after"; curl -sSL -m 60 "$U?action=wishes&callback=cb" | head -c 600; echo
