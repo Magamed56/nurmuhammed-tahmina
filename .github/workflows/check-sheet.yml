@@ -9,7 +9,7 @@ jobs:
     steps:
       - name: Call Apps Script
         run: |
-          U="https://script.google.com/macros/s/AKfycbys5J2_YqJvyDPTVy5fhJJmbI4ANQzaqtVafdcUeeJ4nZIXkQqzcfah-zQGukzaw_zk/exec"
+          U="https://script.google.com/macros/s/AKfycbzonQeT7c2nT6MeE5C6npjcG00ptbM0sU_Qfn8GAx4t-PNP0t2bcFHr9H2FgHzkeyrY/exec"
           V=$(curl -sSL -m 60 "$U?action=version" | head -c 200); echo "== 1. GET version: $V"
           if [ "$V" != "version 3" ]; then echo "OLD CODE STILL DEPLOYED — no test write"; exit 0; fi
           echo "== 2. POST change of the test answer (same row → totals)"
