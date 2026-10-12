@@ -556,14 +556,19 @@
     lastAnswer = { name, attend, guests, wish, sent: true };
     // Таблицага жазуу фондо / запись в таблицу идёт параллельно уведомлению
     const sheet = recordSheet({ name, rsvp: attend, rsvpLabel: T.ky.labels[attend], guests, wish, changed, prevName: changed && prev ? prev.name : "", timestamp: d.toISOString() });
-    addOwnWish(prev && prev.name, name, wish);
+    const ok = () => { addOwnWish(prev && prev.name, name, wish); showSuccess(); };
+    const fail = () => { lastAnswer = prev; submitBtn.disabled = false; note.textContent = t("err"); };
 
     submitBtn.disabled = true; note.textContent = t("sending");
     if (tgReady()) {
-      if (await sendTelegram(text)) { showSuccess(); return; }
-      if (!CFG.googleScriptUrl && !CFG.whatsapp) { lastAnswer = prev; submitBtn.disabled = false; note.textContent = t("err"); return; }
+      if (await sendTelegram(text)) { ok(); return; }
+      if (!CFG.googleScriptUrl && !CFG.whatsapp) { fail(); return; }
     }
-    if (CFG.googleScriptUrl && await sheet) { showSuccess(); return; }
+    // Таблица: если интернет пропал — гость видит ошибку и может отправить ещё раз (ответ не теряется молча)
+    if (CFG.googleScriptUrl) {
+      if (await sheet) { ok(); return; }
+      if (!CFG.whatsapp) { fail(); return; }
+    }
     if (CFG.whatsapp) {
       const wa = [t("wa")(CFG.groom, CFG.bride), `${t("waName")}: ${name}`, `${t("waAnswer")}: ${t("labels")[attend]}${guests ? " · " + guests + " " + t("people") : ""}`, wish ? `💬 ${wish}` : null].filter(Boolean).join("\n");
       showSuccess();
