@@ -119,9 +119,9 @@ function updateTotals(sheet) {
   if (last > 1) {
     var rows = sheet.getRange(2, COL.answer, last - 1, 2).getValues();
     for (var i = 0; i < rows.length; i++) {
-      var label = String(rows[i][0] || "");
-      if (label.indexOf("Келе албаймын") >= 0) no++;
-      else if (label.indexOf("Келемин") >= 0) { yes++; people += Number(rows[i][1]) || 0; }
+      var label = String(rows[i][0] || "").toLowerCase();   // «Жубайым менен келемин» — с маленькой буквы
+      if (label.indexOf("келе албаймын") >= 0) no++;
+      else if (label.indexOf("келемин") >= 0) { yes++; people += Number(rows[i][1]) || 0; }
     }
   }
   sheet.getRange(1, TOTALS_COL + 1, 3, 1).setValues([[yes], [no], [people]]);
