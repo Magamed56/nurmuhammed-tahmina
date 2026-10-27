@@ -1,0 +1,28 @@
+name: Deploy to GitHub Pages
+
+# Публикует содержимое main в ветку gh-pages, откуда GitHub Pages раздаёт сайт.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Stamp asset version and publish main to gh-pages
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          V="${GITHUB_SHA::8}"
+          sed -i "s/__V__/$V/g" index.html v1/index.html v3/index.html
+          git commit -am "build $V" --quiet
+          git push --force origin HEAD:gh-pages
